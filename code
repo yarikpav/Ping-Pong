@@ -1,0 +1,120 @@
+from pygame import *
+from random import randint
+
+#font.init()
+#font1 = font.SysFont('Arial', 80)
+#win = font1.render('YOU WIN!', True, (255,255,255))
+#lose = font1.render('YOU LOSE!', True, (180, 0, 0))
+#font2 = font.SysFont('Airal', 36)
+#mixer.init()
+#mixer.load("Fonmuz.ogg")
+#mixer.musik.play()
+
+#png
+img_fon = "fon.png"
+img_hero1 = "plat.png"
+img_hero2 = "plat2.png"
+img_boll = "tennis.png"
+
+
+class GameSprite(sprite.Sprite):
+ #конструктор класса
+    def __init__(self, player_image, player_x, player_y, size_x, size_y, player_speed):
+      #Вызываем конструктор класса спрайт
+      sprite.Sprite.__init__(self)
+      
+      #каждый спрайт должен хранить свойство имедж - изображение
+      self.image = transform.scale(image.load(player_image), (size_x, size_y))
+      self.speed = player_speed
+
+      #каждый спрайт должен хранить свойство рект - прямоугольник, в который он вписан
+      self.rect = self.image.get_rect()
+      self.rect.x = player_x
+      self.rect.y = player_y
+
+      #метод, отрисования героя на окне
+    def reset(self):
+        window.blit(self.image, (self.rect.x, self.rect.y))
+
+class Player (GameSprite):
+    def update(self):
+        keys = key.get_pressed()
+        if keys [K_w] and self.rect.y > 0:
+            self.rect.y -= self.speed
+        if keys [K_s] and self.rect.y < win_height - 0:
+            self.rect.y += self.speed
+
+class Player2 (GameSprite):
+    def update(self):
+        keys = key.get_pressed()
+        if keys [K_UP] and self.rect.y > 0:
+            self.rect.y -= self.speed
+        if keys [K_DOWN] and self.rect.y < win_height - 0:
+            self.rect.y += self.speed
+
+win_width = 1400  # ширина игрового окна
+win_height = 750  # высота игрового окна
+display.set_caption("Pingpong")
+window = display.set_mode((win_width, win_height))
+background = transform.scale(image.load(img_fon), (win_width, win_height))
+
+
+finish = False
+FPS = 60
+run = True 
+clock = time.Clock()
+
+plita1 = Player(img_hero1, 5, win_height - 375, 80, 100, 20)
+plita2 = Player2(img_hero2, 1315, win_height - 375, 80, 100, 20)
+ball = GameSprite(img_boll, 200, 200, 50, 50, 50)
+
+font.init()
+font = font.SysFont('Times New Roman', 35)
+lose1 = font.render('Player 1 lose!', True, (180, 0, 0))
+lose2 = font.render("Player 2 lose!", True, (180, 0, 0))
+
+speed_x = 3
+speed_y = 3
+
+
+while run:
+    #событие нажатия на кнопку закрыть
+    for e in event.get():
+        clock.tick(FPS)
+        if e.type == QUIT:
+            run = False
+
+    if finish != True:
+        #обновляем фон
+        window.blit(background,(0,0))
+        #производим движения спрайтов
+        plita1.update()
+        plita2.update()
+        ball.rect.x += speed_x
+        ball.rect.y += speed_y
+
+    if sprite.collide_rect(plita1, ball) or sprite.collide_rect(plita2, ball):
+        speed_x *= -1
+        speed_y *= 1
+
+    if ball.rect.y > win_height-50 or ball.rect.y < 0:
+        speed_y *= -1
+
+    if ball.rect.x < 0:
+        finish = True
+        window.blit(lose, (200,200))
+        game_over = True
+
+    if ball.rect.x > win_width:
+        finish = True
+        window.blit(lose2, (200,200))
+        game_over = True
+
+    
+        #обновляем их в новом местоположении при нажатии каждой интерации цикла
+    plita1.reset()
+    plita2.reset()
+    ball.reset()
+
+    display.update()
+    clock.tick(FPS)
